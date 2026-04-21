@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arbin — Freelance Web Developer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+
+<!-- ==============================
+     TOAST NOTIFICATION
+================================ -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:9999">
+  <div id="cartToast" class="toast align-items-center border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toastMsg">
+        <i class="fas fa-check-circle me-2"></i> Added to cart!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ==============================
+     CART OFFCANVAS
+================================ -->
+<div class="offcanvas offcanvas-end" id="cartSidebar" tabindex="-1">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title"><i class="fas fa-shopping-bag me-2"></i>Your Cart</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column">
+    <div id="cartItems" class="flex-grow-1">
+      <div class="cart-empty text-center py-5" id="cartEmpty">
+        <i class="fas fa-bag-shopping mb-3"></i>
+        <p>Your cart is empty</p>
+        <small>Browse services and add something!</small>
+      </div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none!important">
+      <div class="cart-total-row">
+        <span>Subtotal</span>
+        <span id="cartSubtotal">$0</span>
+      </div>
+      <div class="cart-total-row cart-total-main">
+        <span>Total</span>
+        <span id="cartTotal">$0</span>
+      </div>
+      <button class="btn-primary-custom w-100 mt-3" id="checkoutBtn">
+        <i class="fas fa-bolt me-2"></i>Checkout
+      </button>
+      <button class="btn-ghost w-100 mt-2" id="clearCartBtn">Clear Cart</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==============================
+     CHECKOUT MODAL
+================================ -->
+<div class="modal fade" id="checkoutModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-custom">
+      <div class="modal-header border-0">
+        <h5 class="modal-title"><i class="fas fa-lock me-2"></i>Complete Order</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="checkoutForm">
+          <div class="mb-3">
+            <label class="form-label-custom">Full Name</label>
+            <input type="text" class="input-custom" placeholder="John Doe" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label-custom">Email Address</label>
+            <input type="email" class="input-custom" placeholder="john@email.com" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label-custom">Project Details</label>
+            <textarea class="input-custom" rows="3" placeholder="Tell me about your project..."></textarea>
+          </div>
+          <div class="order-summary-box mb-3" id="orderSummaryBox"></div>
+          <button type="submit" class="btn-primary-custom w-100">
+            <i class="fas fa-paper-plane me-2"></i>Send Order Request
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==============================
+     CUSTOM ORDER MODAL
+================================ -->
+<div class="modal fade" id="customModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content modal-custom">
+      <div class="modal-header border-0">
+        <h5 class="modal-title"><i class="fas fa-wand-magic-sparkles me-2"></i>Request Custom Work</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted-custom mb-4">Describe what you need — I'll get back to you within 2 hours with a quote.</p>
+        <form id="customForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label-custom">Your Name</label>
+              <input type="text" class="input-custom" placeholder="John Doe" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label-custom">Your Email</label>
+              <input type="email" class="input-custom" placeholder="john@email.com" required />
+            </div>
+            <div class="col-12">
+              <label class="form-label-custom">Service Type</label>
+              <select class="input-custom">
+                <option>Website Development</option>
+                <option>Landing Page</option>
+                <option>UI/UX Design</option>
+                <option>Bug Fix / Optimization</option>
+                <option>Something else</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label-custom">Budget Range</label>
+              <div class="budget-options">
+                <label class="budget-pill"><input type="radio" name="budget" value="<$50" /><span>Under $50</span></label>
+                <label class="budget-pill"><input type="radio" name="budget" value="$50-$100" /><span>$50–$100</span></label>
+                <label class="budget-pill"><input type="radio" name="budget" value="$100-$200" checked /><span>$100–$200</span></label>
+                <label class="budget-pill"><input type="radio" name="budget" value=">$200" /><span>$200+</span></label>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label-custom">Project Description</label>
+              <textarea class="input-custom" rows="4" placeholder="Describe your project in detail — the more you share, the better I can help..." required></textarea>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn-primary-custom w-100">
+                <i class="fas fa-paper-plane me-2"></i>Send Request
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==============================
+     NAVBAR
+================================ -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="#hero">
+      <svg class="logo-mark" width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="36" height="36" rx="10" fill="#66F01D"/>
+        <path d="M18 8L27.5 28H22.8L21.1 23.5H14.9L13.2 28H8.5L18 8ZM19.6 20L18 15.2L16.4 20H19.6Z" fill="#060A03"/>
+      </svg>
+      <span class="logo-text">arbin<span class="logo-dot">.dev</span></span>
+    </a>
+
+    <div class="d-flex align-items-center gap-2 ms-auto order-lg-last">
+      <button class="cart-icon-btn" id="cartToggle" data-bs-toggle="offcanvas" data-bs-target="#cartSidebar">
+        <i class="fas fa-shopping-bag"></i>
+        <span class="cart-count" id="cartBadge">0</span>
+      </button>
+      <a href="#contact" class="btn-primary-custom btn-sm-custom d-none d-lg-flex">
+        <i class="fas fa-bolt me-1"></i>Hire Me
+      </a>
+      <button class="hamburger d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" id="hamburger" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto gap-lg-1">
+        <li class="nav-item"><a class="nav-link-custom" href="#hero">Home</a></li>
+        <li class="nav-item"><a class="nav-link-custom" href="#services">Services</a></li>
+        <li class="nav-item"><a class="nav-link-custom" href="#products">Shop</a></li>
+        <li class="nav-item"><a class="nav-link-custom" href="#pricing">Pricing</a></li>
+        <li class="nav-item"><a class="nav-link-custom" href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ==============================
+     HERO SECTION
+================================ -->
+<section class="hero-section" id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="container">
+    <div class="row align-items-center min-vh-100">
+      <div class="col-lg-6 hero-left reveal">
+        <div class="available-badge">
+          <span class="badge-dot"></span>
+          Available for new projects
+        </div>
+        <h1 class="hero-heading">
+          I Build<br />
+          <span class="typing-wrap">
+            <span class="typing-text" id="typingText"></span><span class="typing-cursor">|</span>
+          </span><br />
+          That Convert
+        </h1>
+        <p class="hero-desc">
+          Freelance web developer crafting high-performance websites, landing pages, and web apps. Clean code. Fast delivery. Results you can measure.
+        </p>
+        <div class="hero-ctas">
+          <a href="#products" class="btn-primary-custom">
+            <i class="fas fa-store me-2"></i>Browse Services
+          </a>
+          <button class="btn-ghost" data-bs-toggle="modal" data-bs-target="#customModal">
+            <i class="fas fa-wand-magic-sparkles me-2"></i>Custom Order
+          </button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <strong class="counter" data-target="50">0</strong><span>+</span>
+            <small>Projects Done</small>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <strong class="counter" data-target="35">0</strong><span>+</span>
+            <small>Happy Clients</small>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <strong class="counter" data-target="3">0</strong><span>yr</span>
+            <small>Experience</small>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <strong>&lt;2</strong><span>h</span>
+            <small>Response Time</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 hero-right reveal reveal-delay">
+        <div class="hero-visual">
+          <div class="visual-card main-card">
+            <div class="card-topbar">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+              <span class="card-url">arbin.dev/project</span>
+            </div>
+            <div class="code-preview">
+              <div class="code-line"><span class="c-tag">&lt;section</span> <span class="c-attr">class</span>=<span class="c-str">"hero"</span><span class="c-tag">&gt;</span></div>
+              <div class="code-line ps-3"><span class="c-tag">&lt;h1&gt;</span><span class="c-text">Modern Website</span><span class="c-tag">&lt;/h1&gt;</span></div>
+              <div class="code-line ps-3"><span class="c-tag">&lt;p&gt;</span><span class="c-text">That actually works</span><span class="c-tag">&lt;/p&gt;</span></div>
+              <div class="code-line ps-3"><span class="c-tag">&lt;button</span> <span class="c-attr">class</span>=<span class="c-str">"cta"</span><span class="c-tag">&gt;</span><span class="c-text">Get Started</span><span class="c-tag">&lt;/button&gt;</span></div>
+              <div class="code-line"><span class="c-tag">&lt;/section&gt;</span></div>
+              <div class="code-line mt-2"><span class="c-comment">/* Fast · Clean · Responsive */</span></div>
+            </div>
+          </div>
+
+          <div class="float-card fc-top-right">
+            <div class="fc-icon"><i class="fas fa-rocket"></i></div>
+            <div>
+              <div class="fc-label">Delivery</div>
+              <div class="fc-value">3 Days</div>
+            </div>
+          </div>
+
+          <div class="float-card fc-bottom-left">
+            <div class="fc-icon star"><i class="fas fa-star"></i></div>
+            <div>
+              <div class="fc-label">Client Rating</div>
+              <div class="fc-value">5.0 ★★★★★</div>
+            </div>
+          </div>
+
+          <div class="float-card fc-bottom-right">
+            <div class="fc-icon check"><i class="fas fa-check"></i></div>
+            <div>
+              <div class="fc-label">Projects Live</div>
+              <div class="fc-value">50+ Done</div>
+            </div>
+          </div>
+
+          <div class="glow-orb orb-1"></div>
+          <div class="glow-orb orb-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="#services" class="scroll-indicator">
+    <i class="fas fa-chevron-down"></i>
+  </a>
+</section>
+
+<!-- ==============================
+     SERVICES SECTION
+================================ -->
+<section class="section-pad" id="services">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">What I Do</div>
+      <h2 class="section-title">Services Built to <span class="text-accent">Grow Your Business</span></h2>
+      <p class="section-desc">Every project is handled from start to finish — design, code, deploy. No middleman, no agency markup.</p>
+    </div>
+
+    <div class="row g-4 mt-2">
+      <div class="col-md-6 col-lg-4 reveal">
+        <div class="service-card">
+          <div class="service-icon-wrap">
+            <i class="fas fa-code"></i>
+          </div>
+          <h3 class="service-title">Web Development</h3>
+          <p class="service-desc">Fast, responsive websites built with modern tech. From landing pages to full business sites — pixel-perfect, always.</p>
+          <ul class="service-list">
+            <li><i class="fas fa-check"></i>Landing Pages</li>
+            <li><i class="fas fa-check"></i>Portfolio Sites</li>
+            <li><i class="fas fa-check"></i>Business Websites</li>
+          </ul>
+          <a href="#products" class="service-link">View packages <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 reveal reveal-delay">
+        <div class="service-card service-card-featured">
+          <div class="featured-label">Most Requested</div>
+          <div class="service-icon-wrap">
+            <i class="fas fa-paintbrush"></i>
+          </div>
+          <h3 class="service-title">UI/UX Design</h3>
+          <p class="service-desc">Clean, modern interfaces that users love. I design with conversion in mind — every button placement has a reason.</p>
+          <ul class="service-list">
+            <li><i class="fas fa-check"></i>Component Libraries</li>
+            <li><i class="fas fa-check"></i>Responsive Design</li>
+            <li><i class="fas fa-check"></i>Brand Identity</li>
+          </ul>
+          <a href="#products" class="service-link">View packages <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 reveal reveal-delay-2">
+        <div class="service-card">
+          <div class="service-icon-wrap">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3 class="service-title">Quick Fixes</h3>
+          <p class="service-desc">Bug fixes, speed optimization, mobile responsiveness, SEO tweaks — fast turnaround, real results.</p>
+          <ul class="service-list">
+            <li><i class="fas fa-check"></i>Bug Fixing</li>
+            <li><i class="fas fa-check"></i>Performance Boost</li>
+            <li><i class="fas fa-check"></i>Mobile Fixes</li>
+          </ul>
+          <a href="#products" class="service-link">View packages <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==============================
+     PRODUCTS / SHOP SECTION
+================================ -->
+<section class="section-pad section-dark" id="products">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">Shop</div>
+      <h2 class="section-title">Pick a Service, <span class="text-accent">I'll Handle the Rest</span></h2>
+      <p class="section-desc">Fixed-price packages. No hidden costs. Delivery guaranteed.</p>
+    </div>
+
+    <div class="filter-tabs reveal">
+      <button class="filter-btn active" data-filter="all">All Services</button>
+      <button class="filter-btn" data-filter="web">Web Dev</button>
+      <button class="filter-btn" data-filter="design">UI Design</button>
+      <button class="filter-btn" data-filter="component">Components</button>
+      <button class="filter-btn" data-filter="fix">Quick Fix</button>
+    </div>
+
+    <div class="row g-4" id="productsGrid">
+      <!-- Products injected by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ==============================
+     HOW IT WORKS
+================================ -->
+<section class="section-pad" id="how">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">Process</div>
+      <h2 class="section-title">From Order to <span class="text-accent">Live in Days</span></h2>
+    </div>
+
+    <div class="row g-4 mt-2 position-relative">
+      <div class="how-line d-none d-lg-block"></div>
+      <div class="col-md-6 col-lg-3 reveal">
+        <div class="how-card">
+          <div class="how-step">01</div>
+          <div class="how-icon"><i class="fas fa-cart-plus"></i></div>
+          <h4>Choose a Service</h4>
+          <p>Pick a package that fits your needs or request something custom.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 reveal reveal-delay">
+        <div class="how-card">
+          <div class="how-step">02</div>
+          <div class="how-icon"><i class="fas fa-comments"></i></div>
+          <h4>Brief & Align</h4>
+          <p>We discuss your goals, brand, and timeline over a quick call or chat.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 reveal reveal-delay-2">
+        <div class="how-card">
+          <div class="how-step">03</div>
+          <div class="how-icon"><i class="fas fa-hammer"></i></div>
+          <h4>I Build It</h4>
+          <p>Clean code, modern design, tested on all devices before delivery.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 reveal reveal-delay-3">
+        <div class="how-card">
+          <div class="how-step">04</div>
+          <div class="how-icon"><i class="fas fa-rocket"></i></div>
+          <h4>Launch & Support</h4>
+          <p>Go live with confidence. Free revisions and support after delivery.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==============================
+     STATS BAND
+================================ -->
+<section class="stats-band">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-6 col-lg-3 reveal">
+        <div class="stat-band-item">
+          <strong class="counter" data-target="50">0</strong><span>+</span>
+          <p>Projects Delivered</p>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3 reveal reveal-delay">
+        <div class="stat-band-item">
+          <strong class="counter" data-target="35">0</strong><span>+</span>
+          <p>Happy Clients</p>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3 reveal reveal-delay-2">
+        <div class="stat-band-item">
+          <strong>99</strong><span>%</span>
+          <p>On-Time Delivery</p>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3 reveal reveal-delay-3">
+        <div class="stat-band-item">
+          <strong>5.0</strong><span>★</span>
+          <p>Average Rating</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==============================
+     PRICING SECTION
+================================ -->
+<section class="section-pad" id="pricing">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Transparent Pricing, <span class="text-accent">No Surprises</span></h2>
+      <p class="section-desc">All packages include free revisions and post-delivery support.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center mt-2">
+      <div class="col-md-6 col-lg-4 reveal">
+        <div class="pricing-card">
+          <div class="pricing-tier">Starter</div>
+          <div class="pricing-price">$<span>50</span></div>
+          <div class="pricing-period">one-time</div>
+          <ul class="pricing-features">
+            <li><i class="fas fa-check"></i>1-Page Landing Page</li>
+            <li><i class="fas fa-check"></i>Fully Responsive</li>
+            <li><i class="fas fa-check"></i>Contact Form</li>
+            <li><i class="fas fa-check"></i>2 Revisions</li>
+            <li><i class="fas fa-check"></i>3-Day Delivery</li>
+            <li class="disabled"><i class="fas fa-times"></i>Custom Animations</li>
+            <li class="disabled"><i class="fas fa-times"></i>CMS Integration</li>
+          </ul>
+          <button class="btn-ghost w-100" onclick="addToCartById(1)">
+            <i class="fas fa-cart-plus me-2"></i>Order Now
+          </button>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 reveal reveal-delay">
+        <div class="pricing-card pricing-featured">
+          <div class="pricing-popular">Most Popular</div>
+          <div class="pricing-tier">Pro</div>
+          <div class="pricing-price">$<span>120</span></div>
+          <div class="pricing-period">one-time</div>
+          <ul class="pricing-features">
+            <li><i class="fas fa-check"></i>Up to 5 Pages</li>
+            <li><i class="fas fa-check"></i>Fully Responsive</li>
+            <li><i class="fas fa-check"></i>Contact Form + Map</li>
+            <li><i class="fas fa-check"></i>5 Revisions</li>
+            <li><i class="fas fa-check"></i>5-Day Delivery</li>
+            <li><i class="fas fa-check"></i>Custom Animations</li>
+            <li class="disabled"><i class="fas fa-times"></i>CMS Integration</li>
+          </ul>
+          <button class="btn-primary-custom w-100" onclick="addToCartById(13)">
+            <i class="fas fa-cart-plus me-2"></i>Order Now
+          </button>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 reveal reveal-delay-2">
+        <div class="pricing-card">
+          <div class="pricing-tier">Premium</div>
+          <div class="pricing-price">$<span>250</span></div>
+          <div class="pricing-period">one-time</div>
+          <ul class="pricing-features">
+            <li><i class="fas fa-check"></i>Unlimited Pages</li>
+            <li><i class="fas fa-check"></i>Fully Responsive</li>
+            <li><i class="fas fa-check"></i>Advanced Forms</li>
+            <li><i class="fas fa-check"></i>Unlimited Revisions</li>
+            <li><i class="fas fa-check"></i>7-Day Delivery</li>
+            <li><i class="fas fa-check"></i>Custom Animations</li>
+            <li><i class="fas fa-check"></i>CMS Integration</li>
+          </ul>
+          <button class="btn-ghost w-100" onclick="addToCartById(14)">
+            <i class="fas fa-cart-plus me-2"></i>Order Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==============================
+     TESTIMONIALS
+================================ -->
+<section class="section-pad section-dark" id="testimonials">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">Reviews</div>
+      <h2 class="section-title">What Clients <span class="text-accent">Say About Me</span></h2>
+    </div>
+
+    <div class="row g-4 mt-2">
+      <div class="col-md-6 col-lg-4 reveal">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Arbin built my landing page in just 3 days. Clean design, fast load, and he answered every question I had. Already seeing better conversions!"</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">JM</div>
+            <div>
+              <div class="author-name">James Miller</div>
+              <div class="author-role">Startup Founder</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4 reveal reveal-delay">
+        <div class="testimonial-card testimonial-featured">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Exceptional work. Delivered my portfolio website ahead of schedule. The animations and responsive design are spot on. Will hire again!"</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">SK</div>
+            <div>
+              <div class="author-name">Sara Kim</div>
+              <div class="author-role">UX Designer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4 reveal reveal-delay-2">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Fixed a major bug in my site in under an hour. Super responsive, knew exactly what was wrong. Best $20 I've spent on my business."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">TR</div>
+            <div>
+              <div class="author-name">Tom Rodriguez</div>
+              <div class="author-role">E-commerce Owner</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==============================
+     CUSTOM ORDER CTA
+================================ -->
+<section class="cta-band reveal">
+  <div class="container">
+    <div class="cta-inner">
+      <div class="cta-glow"></div>
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <div class="section-label">Custom Work</div>
+          <h2 class="cta-title">Have Something Specific in Mind?</h2>
+          <p class="cta-desc">Don't see exactly what you need? Tell me your vision — I'll turn it into reality with a custom quote in under 2 hours.</p>
+        </div>
+        <div class="col-lg-5 text-lg-end">
+          <button class="btn-primary-custom btn-lg-custom" data-bs-toggle="modal" data-bs-target="#customModal">
+            <i class="fas fa-wand-magic-sparkles me-2"></i>Request Custom Order
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==============================
+     CONTACT SECTION
+================================ -->
+<section class="section-pad" id="contact">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">Contact</div>
+      <h2 class="section-title">Let's Build Something <span class="text-accent">Together</span></h2>
+      <p class="section-desc">Have a question or want to discuss a project? I'm one message away.</p>
+    </div>
+
+    <div class="row g-5 mt-1">
+      <div class="col-lg-5 reveal">
+        <div class="contact-info">
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+            <div>
+              <div class="contact-label">Email</div>
+              <div class="contact-value">zekoameti6@gmail.com</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-clock"></i></div>
+            <div>
+              <div class="contact-label">Response Time</div>
+              <div class="contact-value">Within 2 hours</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-globe"></i></div>
+            <div>
+              <div class="contact-label">Availability</div>
+              <div class="contact-value">Mon–Sat, 9am–8pm</div>
+            </div>
+          </div>
+          <div class="contact-socials">
+            <a href="#" class="social-btn" title="GitHub"><i class="fab fa-github"></i></a>
+            <a href="#" class="social-btn" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" class="social-btn" title="Twitter/X"><i class="fab fa-x-twitter"></i></a>
+            <a href="#" class="social-btn" title="Fiverr"><i class="fas fa-f"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-7 reveal reveal-delay">
+        <form class="contact-form" id="contactForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label-custom">Your Name</label>
+              <input type="text" class="input-custom" placeholder="John Doe" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label-custom">Email Address</label>
+              <input type="email" class="input-custom" placeholder="john@email.com" required />
+            </div>
+            <div class="col-12">
+              <label class="form-label-custom">Subject</label>
+              <input type="text" class="input-custom" placeholder="What's this about?" required />
+            </div>
+            <div class="col-12">
+              <label class="form-label-custom">Message</label>
+              <textarea class="input-custom" rows="5" placeholder="Tell me about your project, idea, or question..." required></textarea>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn-primary-custom w-100">
+                <i class="fas fa-paper-plane me-2"></i>Send Message
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==============================
+     FOOTER
+================================ -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="row g-4 align-items-start">
+      <div class="col-lg-4">
+        <a class="footer-brand" href="#hero">
+          <svg class="logo-mark" width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="36" height="36" rx="10" fill="#66F01D"/>
+            <path d="M18 8L27.5 28H22.8L21.1 23.5H14.9L13.2 28H8.5L18 8ZM19.6 20L18 15.2L16.4 20H19.6Z" fill="#060A03"/>
+          </svg>
+          <span class="logo-text">arbin<span class="logo-dot">.dev</span></span>
+        </a>
+        <p class="footer-desc">Freelance web developer building modern, fast, and conversion-focused websites. Let's grow your business online.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-btn"><i class="fab fa-github"></i></a>
+          <a href="#" class="social-btn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="social-btn"><i class="fab fa-x-twitter"></i></a>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-2 offset-lg-1">
+        <div class="footer-col-title">Services</div>
+        <ul class="footer-links">
+          <li><a href="#products">Landing Pages</a></li>
+          <li><a href="#products">Portfolio Sites</a></li>
+          <li><a href="#products">Business Websites</a></li>
+          <li><a href="#products">UI Components</a></li>
+          <li><a href="#products">Bug Fixes</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <div class="footer-col-title">Navigate</div>
+        <ul class="footer-links">
+          <li><a href="#hero">Home</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3">
+        <div class="footer-col-title">Quick Order</div>
+        <p class="footer-small">Need something fast? Order directly without the back-and-forth.</p>
+        <button class="btn-primary-custom btn-sm-custom w-100" data-bs-toggle="modal" data-bs-target="#customModal">
+          <i class="fas fa-bolt me-1"></i>Custom Order
+        </button>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 Arbin. Built with passion &amp; clean code.</span>
+      <span>Available worldwide <span class="online-dot"></span></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
