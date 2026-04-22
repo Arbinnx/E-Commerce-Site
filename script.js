@@ -168,11 +168,7 @@ const PRODUCTS = [
 // ============================================
 // CART STATE
 // ============================================
-let cart = JSON.parse(localStorage.getItem('arbin_cart') || '[]');
-
-function saveCart() {
-  localStorage.setItem('arbin_cart', JSON.stringify(cart));
-}
+let cart = [];
 
 function getCartCount() {
   return cart.reduce((sum, item) => sum + item.qty, 0);
@@ -193,10 +189,9 @@ function addToCart(productId) {
     cart.push({ id: product.id, name: product.name, price: product.price, icon: product.icon, qty: 1 });
   }
 
-  saveCart();
   renderCart();
   updateCartBadge();
-  showToast(`<i class="fas fa-check-circle me-2"></i>${product.name} added to cart!`);
+  showToast(`${product.name} added to cart!`);
 }
 
 // exposed globally for onclick in pricing section
@@ -204,7 +199,6 @@ window.addToCartById = addToCart;
 
 function removeFromCart(productId) {
   cart = cart.filter(i => i.id !== productId);
-  saveCart();
   renderCart();
   updateCartBadge();
 }
@@ -217,14 +211,12 @@ function updateQty(productId, delta) {
     removeFromCart(productId);
     return;
   }
-  saveCart();
   renderCart();
   updateCartBadge();
 }
 
 function clearCart() {
   cart = [];
-  saveCart();
   renderCart();
   updateCartBadge();
 }
@@ -291,13 +283,15 @@ function renderCart() {
 // ============================================
 // TOAST
 // ============================================
+let _toastTimer = null;
 function showToast(msg) {
-  const toastEl = document.getElementById('cartToast');
-  const msgEl   = document.getElementById('toastMsg');
-  if (!toastEl || !msgEl) return;
-  msgEl.innerHTML = msg;
-  const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 2400 });
-  toast.show();
+  const toast = document.getElementById('customToast');
+  const msgEl = document.getElementById('customToastMsg');
+  if (!toast || !msgEl) return;
+  msgEl.textContent = msg;
+  toast.classList.add('show');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
 // ============================================
@@ -368,7 +362,7 @@ function initFilters() {
 // ============================================
 // TYPING ANIMATION
 // ============================================
-const TYPING_WORDS = ['Modern Websites', 'Landing Pages', 'Web Applications', 'UI Components'];
+const TYPING_WORDS = ['Modern Websites', 'Landing Pages', 'Business Websites', 'UI Components'];
 let typeIndex  = 0;
 let charIndex  = 0;
 let isDeleting = false;
@@ -547,11 +541,35 @@ function initCheckout() {
 
   const checkoutForm = document.getElementById('checkoutForm');
   if (checkoutForm) {
-    checkoutForm.addEventListener('submit', e => {
+    checkoutForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      bootstrap.Modal.getInstance(document.getElementById('checkoutModal'))?.hide();
-      clearCart();
-      showToast('<i class="fas fa-check-circle me-2"></i>Order sent! I\'ll be in touch within 2 hours.');
+      const submitBtn = checkoutForm.querySelector('[type="submit"]');
+      const orig = submitBtn.innerHTML;
+      submitBtn.innerHTML = 'Sending…';
+      submitBtn.disabled = true;
+
+      const data = new FormData(checkoutForm);
+      data.append('_subject', 'New Quote Request — arbin.dev');
+      if (cart.length > 0) {
+        data.append('Services Requested', cart.map(i => `${i.name} × ${i.qty} ($${i.price * i.qty})`).join(', '));
+        data.append('Estimated Total', `$${getCartTotal()}`);
+      }
+
+      try {
+        const res = await fetch('https://formspree.io/f/mnjlgerb', {
+          method: 'POST', body: data, headers: { Accept: 'application/json' }
+        });
+        bootstrap.Modal.getInstance(document.getElementById('checkoutModal'))?.hide();
+        clearCart();
+        showToast(res.ok ? "Quote request sent! I'll be in touch within 2 hours." : 'Something went wrong. Email me directly.');
+      } catch {
+        bootstrap.Modal.getInstance(document.getElementById('checkoutModal'))?.hide();
+        clearCart();
+        showToast("Quote request sent! I'll be in touch within 2 hours.");
+      } finally {
+        submitBtn.innerHTML = orig;
+        submitBtn.disabled = false;
+      }
     });
   }
 }
@@ -562,11 +580,29 @@ function initCheckout() {
 function initCustomOrder() {
   const form = document.getElementById('customForm');
   if (!form) return;
-  form.addEventListener('submit', e => {
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    bootstrap.Modal.getInstance(document.getElementById('customModal'))?.hide();
-    showToast('<i class="fas fa-paper-plane me-2"></i>Request received! Expect a quote in 2 hours.');
-    form.reset();
+    const submitBtn = document.getElementById('customSubmitBtn');
+    const orig = submitBtn.innerHTML;
+    submitBtn.innerHTML = 'Sending…';
+    submitBtn.disabled = true;
+
+    try {
+      const res = await fetch('https://formspree.io/f/mnjlgerb', {
+        method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' }
+      });
+      bootstrap.Modal.getInstance(document.getElementById('customModal'))?.hide();
+      showToast(res.ok ? 'Request received! Expect a quote in 2 hours.' : 'Failed to send. Please email me directly.');
+      if (res.ok) form.reset();
+    } catch {
+      bootstrap.Modal.getInstance(document.getElementById('customModal'))?.hide();
+      showToast('Request received! Expect a quote in 2 hours.');
+      form.reset();
+    } finally {
+      submitBtn.innerHTML = orig;
+      submitBtn.disabled = false;
+    }
   });
 }
 
@@ -576,10 +612,36 @@ function initCustomOrder() {
 function initContactForm() {
   const form = document.getElementById('contactForm');
   if (!form) return;
-  form.addEventListener('submit', e => {
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    showToast('<i class="fas fa-check-circle me-2"></i>Message sent! I\'ll reply within 2 hours.');
-    form.reset();
+    const submitBtn = document.getElementById('contactSubmitBtn');
+    const orig = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending…';
+    submitBtn.disabled = true;
+
+    const data = new FormData(form);
+    if (cart.length > 0) {
+      data.append('Services Interested In', cart.map(i => `${i.name} × ${i.qty} ($${i.price * i.qty})`).join(', '));
+      data.append('Estimated Budget', `$${getCartTotal()}`);
+    }
+
+    try {
+      const res = await fetch('https://formspree.io/f/mnjlgerb', {
+        method: 'POST', body: data, headers: { Accept: 'application/json' }
+      });
+      if (res.ok) {
+        showToast("Message sent! I'll reply within 2 hours.");
+        form.reset();
+      } else {
+        showToast('Failed to send. Please email me directly.');
+      }
+    } catch {
+      showToast('Failed to send. Please email me directly.');
+    } finally {
+      submitBtn.innerHTML = orig;
+      submitBtn.disabled = false;
+    }
   });
 }
 

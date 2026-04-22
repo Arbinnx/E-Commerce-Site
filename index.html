@@ -12,17 +12,11 @@
 <body>
 
 <!-- ==============================
-     TOAST NOTIFICATION
+     CUSTOM TOAST NOTIFICATION
 ================================ -->
-<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:9999">
-  <div id="cartToast" class="toast align-items-center border-0" role="alert">
-    <div class="d-flex">
-      <div class="toast-body" id="toastMsg">
-        <i class="fas fa-check-circle me-2"></i> Added to cart!
-      </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-    </div>
-  </div>
+<div id="customToast" class="custom-toast" role="alert" aria-live="polite">
+  <div class="custom-toast-icon"><i class="fas fa-check"></i></div>
+  <div id="customToastMsg" class="custom-toast-text">Added to cart!</div>
 </div>
 
 <!-- ==============================
@@ -43,17 +37,20 @@
     </div>
     <div class="cart-footer" id="cartFooter" style="display:none!important">
       <div class="cart-total-row">
-        <span>Subtotal</span>
+        <span>Est. Budget</span>
         <span id="cartSubtotal">$0</span>
       </div>
       <div class="cart-total-row cart-total-main">
-        <span>Total</span>
+        <span>Total Est.</span>
         <span id="cartTotal">$0</span>
       </div>
-      <button class="btn-primary-custom w-100 mt-3" id="checkoutBtn">
-        <i class="fas fa-bolt me-2"></i>Checkout
+      <div class="cart-notice">
+        <i class="fas fa-info-circle me-1"></i>No payment here — I'll contact you with a final quote after reviewing your request.
+      </div>
+      <button class="btn-primary-custom w-100" id="checkoutBtn">
+        <i class="fas fa-paper-plane me-2"></i>Request a Quote
       </button>
-      <button class="btn-ghost w-100 mt-2" id="clearCartBtn">Clear Cart</button>
+      <button class="btn-ghost w-100 mt-2" id="clearCartBtn">Clear</button>
     </div>
   </div>
 </div>
@@ -65,26 +62,30 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content modal-custom">
       <div class="modal-header border-0">
-        <h5 class="modal-title"><i class="fas fa-lock me-2"></i>Complete Order</h5>
+        <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>Request a Quote</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
+        <p class="text-muted-custom mb-4" style="font-size:0.82rem;background:var(--surface);border:1px solid var(--accent-border);border-radius:var(--radius-sm);padding:10px 14px;">
+          <i class="fas fa-shield-halved me-1" style="color:var(--accent)"></i>
+          This is just a quote request — no payment or billing info needed. I'll reply within 2 hours.
+        </p>
         <form id="checkoutForm">
           <div class="mb-3">
             <label class="form-label-custom">Full Name</label>
-            <input type="text" class="input-custom" placeholder="John Doe" required />
+            <input type="text" name="name" class="input-custom" placeholder="John Doe" required />
           </div>
           <div class="mb-3">
             <label class="form-label-custom">Email Address</label>
-            <input type="email" class="input-custom" placeholder="john@email.com" required />
+            <input type="email" name="email" class="input-custom" placeholder="john@email.com" required />
           </div>
           <div class="mb-3">
             <label class="form-label-custom">Project Details</label>
-            <textarea class="input-custom" rows="3" placeholder="Tell me about your project..."></textarea>
+            <textarea name="project_details" class="input-custom" rows="3" placeholder="Tell me about your project..."></textarea>
           </div>
           <div class="order-summary-box mb-3" id="orderSummaryBox"></div>
           <button type="submit" class="btn-primary-custom w-100">
-            <i class="fas fa-paper-plane me-2"></i>Send Order Request
+            <i class="fas fa-paper-plane me-2"></i>Send Quote Request
           </button>
         </form>
       </div>
@@ -104,19 +105,20 @@
       </div>
       <div class="modal-body">
         <p class="text-muted-custom mb-4">Describe what you need — I'll get back to you within 2 hours with a quote.</p>
-        <form id="customForm">
+        <form id="customForm" novalidate>
+          <input type="hidden" name="_subject" value="New Custom Order Request — arbin.dev" />
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label-custom">Your Name</label>
-              <input type="text" class="input-custom" placeholder="John Doe" required />
+              <input type="text" name="name" class="input-custom" placeholder="John Doe" required />
             </div>
             <div class="col-md-6">
               <label class="form-label-custom">Your Email</label>
-              <input type="email" class="input-custom" placeholder="john@email.com" required />
+              <input type="email" name="email" class="input-custom" placeholder="john@email.com" required />
             </div>
             <div class="col-12">
               <label class="form-label-custom">Service Type</label>
-              <select class="input-custom">
+              <select name="service_type" class="input-custom">
                 <option>Website Development</option>
                 <option>Landing Page</option>
                 <option>UI/UX Design</option>
@@ -127,18 +129,18 @@
             <div class="col-12">
               <label class="form-label-custom">Budget Range</label>
               <div class="budget-options">
-                <label class="budget-pill"><input type="radio" name="budget" value="<$50" /><span>Under $50</span></label>
-                <label class="budget-pill"><input type="radio" name="budget" value="$50-$100" /><span>$50–$100</span></label>
-                <label class="budget-pill"><input type="radio" name="budget" value="$100-$200" checked /><span>$100–$200</span></label>
-                <label class="budget-pill"><input type="radio" name="budget" value=">$200" /><span>$200+</span></label>
+                <label class="budget-pill"><input type="radio" name="budget" value="Under $50" /><span>Under $50</span></label>
+                <label class="budget-pill"><input type="radio" name="budget" value="$50–$100" /><span>$50–$100</span></label>
+                <label class="budget-pill"><input type="radio" name="budget" value="$100–$200" checked /><span>$100–$200</span></label>
+                <label class="budget-pill"><input type="radio" name="budget" value="$200+" /><span>$200+</span></label>
               </div>
             </div>
             <div class="col-12">
               <label class="form-label-custom">Project Description</label>
-              <textarea class="input-custom" rows="4" placeholder="Describe your project in detail — the more you share, the better I can help..." required></textarea>
+              <textarea name="project_description" class="input-custom" rows="4" placeholder="Describe your project in detail — the more you share, the better I can help..." required></textarea>
             </div>
             <div class="col-12">
-              <button type="submit" class="btn-primary-custom w-100">
+              <button type="submit" class="btn-primary-custom w-100" id="customSubmitBtn">
                 <i class="fas fa-paper-plane me-2"></i>Send Request
               </button>
             </div>
@@ -159,7 +161,6 @@
         <rect width="36" height="36" rx="10" fill="#66F01D"/>
         <path d="M18 8L27.5 28H22.8L21.1 23.5H14.9L13.2 28H8.5L18 8ZM19.6 20L18 15.2L16.4 20H19.6Z" fill="#060A03"/>
       </svg>
-      <span class="logo-text">arbin<span class="logo-dot">.dev</span></span>
     </a>
 
     <div class="d-flex align-items-center gap-2 ms-auto order-lg-last">
@@ -207,7 +208,7 @@
           That Convert
         </h1>
         <p class="hero-desc">
-          Freelance web developer crafting high-performance websites, landing pages, and web apps. Clean code. Fast delivery. Results you can measure.
+          Freelance web developer crafting high-performance websites and landing pages. Clean code. Fast delivery. Results you can measure.
         </p>
         <div class="hero-ctas">
           <a href="#products" class="btn-primary-custom">
@@ -234,7 +235,7 @@
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
-            <strong>&lt;2</strong><span>h</span>
+            <strong>2</strong><span>h</span>
             <small>Response Time</small>
           </div>
         </div>
@@ -364,7 +365,7 @@
     <div class="section-header reveal">
       <div class="section-label">Shop</div>
       <h2 class="section-title">Pick a Service, <span class="text-accent">I'll Handle the Rest</span></h2>
-      <p class="section-desc">Fixed-price packages. No hidden costs. Delivery guaranteed.</p>
+      <p class="section-desc">Browse fixed-price packages and send a quote request — no payment here, I'll get back to you directly.</p>
     </div>
 
     <div class="filter-tabs reveal">
@@ -648,39 +649,40 @@
             <div class="contact-icon"><i class="fas fa-globe"></i></div>
             <div>
               <div class="contact-label">Availability</div>
-              <div class="contact-value">Mon–Sat, 9am–8pm</div>
+              <div class="contact-value">Mon–Sun, 9am–8pm</div>
             </div>
           </div>
           <div class="contact-socials">
-            <a href="#" class="social-btn" title="GitHub"><i class="fab fa-github"></i></a>
+            <a href="https://github.com/Arbinnx" target="_blank" class="social-btn" title="GitHub"><i class="fab fa-github"></i></a>
             <a href="#" class="social-btn" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#" class="social-btn" title="Twitter/X"><i class="fab fa-x-twitter"></i></a>
-            <a href="#" class="social-btn" title="Fiverr"><i class="fas fa-f"></i></a>
+            <a href="#" class="social-btn" title="TikTok"><i class="fab fa-tiktok"></i></a>
+            <a href="#" class="social-btn" title="Instagram"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
       </div>
 
       <div class="col-lg-7 reveal reveal-delay">
-        <form class="contact-form" id="contactForm">
+        <form class="contact-form" id="contactForm" novalidate>
+          <input type="hidden" name="_subject" value="New message from arbin.dev portfolio" />
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label-custom">Your Name</label>
-              <input type="text" class="input-custom" placeholder="John Doe" required />
+              <input type="text" name="name" class="input-custom" placeholder="John Doe" required />
             </div>
             <div class="col-md-6">
               <label class="form-label-custom">Email Address</label>
-              <input type="email" class="input-custom" placeholder="john@email.com" required />
+              <input type="email" name="email" class="input-custom" placeholder="john@email.com" required />
             </div>
             <div class="col-12">
               <label class="form-label-custom">Subject</label>
-              <input type="text" class="input-custom" placeholder="What's this about?" required />
+              <input type="text" name="subject" class="input-custom" placeholder="What's this about?" required />
             </div>
             <div class="col-12">
               <label class="form-label-custom">Message</label>
-              <textarea class="input-custom" rows="5" placeholder="Tell me about your project, idea, or question..." required></textarea>
+              <textarea name="message" class="input-custom" rows="5" placeholder="Tell me about your project, idea, or question..." required></textarea>
             </div>
             <div class="col-12">
-              <button type="submit" class="btn-primary-custom w-100">
+              <button type="submit" class="btn-primary-custom w-100" id="contactSubmitBtn">
                 <i class="fas fa-paper-plane me-2"></i>Send Message
               </button>
             </div>
@@ -707,9 +709,10 @@
         </a>
         <p class="footer-desc">Freelance web developer building modern, fast, and conversion-focused websites. Let's grow your business online.</p>
         <div class="footer-socials">
-          <a href="#" class="social-btn"><i class="fab fa-github"></i></a>
-          <a href="#" class="social-btn"><i class="fab fa-linkedin-in"></i></a>
-          <a href="#" class="social-btn"><i class="fab fa-x-twitter"></i></a>
+          <a href="https://github.com/Arbinnx" target="_blank" class="social-btn" title="GitHub"><i class="fab fa-github"></i></a>
+          <a href="#" class="social-btn" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="social-btn" title="TikTok"><i class="fab fa-tiktok"></i></a>
+          <a href="#" class="social-btn" title="Instagram"><i class="fab fa-instagram"></i></a>
         </div>
       </div>
 

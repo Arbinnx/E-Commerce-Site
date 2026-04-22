@@ -134,7 +134,7 @@ img { max-width: 100%; display: block; }
   background: var(--surface-2);
   box-shadow: 0 0 0 3px rgba(102,240,29,0.08);
 }
-textarea.input-custom { resize: vertical; min-height: 100px; }
+textarea.input-custom { resize: none; min-height: 100px; }
 
 .form-label-custom {
   display: block;
@@ -196,15 +196,50 @@ textarea.input-custom { resize: vertical; min-height: 100px; }
 .reveal-delay-3 { transition-delay: 0.45s; }
 
 /* ============================================
-   TOAST
+   CUSTOM TOAST
 ============================================ */
-#cartToast {
+.custom-toast {
+  position: fixed;
+  top: 90px;
+  right: 24px;
   background: var(--surface-2);
   border: 1px solid var(--accent-border);
+  border-left: 3px solid var(--accent);
   border-radius: var(--radius-md);
-  color: var(--text-1);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  transform: translateX(calc(100% + 40px));
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 260px;
+  max-width: 340px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px var(--accent-border);
+  pointer-events: none;
 }
-#cartToast .toast-body { color: var(--accent); font-weight: 600; }
+.custom-toast.show {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+.custom-toast-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.custom-toast-text {
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: var(--text-1);
+  line-height: 1.4;
+}
 
 /* ============================================
    CART OFFCANVAS
@@ -318,6 +353,19 @@ textarea.input-custom { resize: vertical; min-height: 100px; }
   margin-top: 4px;
 }
 .cart-total-main span:last-child { color: var(--accent); }
+
+.cart-notice {
+  font-size: 0.76rem;
+  color: var(--text-2);
+  text-align: center;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent-border);
+  margin: 12px 0 8px;
+  line-height: 1.5;
+}
+.cart-notice i { color: var(--accent); }
 
 /* ============================================
    MODALS
@@ -1404,6 +1452,8 @@ textarea.input-custom { resize: vertical; min-height: 100px; }
 }
 
 @media (max-width: 767.98px) {
+  /* Prevent iOS/Android auto-zoom on input focus (requires font-size >= 16px) */
+  .input-custom { font-size: 16px; }
   .section-pad { padding: 70px 0; }
   .hero-heading { font-size: 2.2rem; }
   .hero-stats { gap: 16px; flex-wrap: wrap; }
