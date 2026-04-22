@@ -567,6 +567,7 @@ function initCheckout() {
         clearCart();
         showToast("Quote request sent! I'll be in touch within 2 hours.");
       } finally {
+        checkoutForm.reset();
         submitBtn.innerHTML = orig;
         submitBtn.disabled = false;
       }
@@ -594,12 +595,11 @@ function initCustomOrder() {
       });
       bootstrap.Modal.getInstance(document.getElementById('customModal'))?.hide();
       showToast(res.ok ? 'Request received! Expect a quote in 2 hours.' : 'Failed to send. Please email me directly.');
-      if (res.ok) form.reset();
     } catch {
       bootstrap.Modal.getInstance(document.getElementById('customModal'))?.hide();
       showToast('Request received! Expect a quote in 2 hours.');
-      form.reset();
     } finally {
+      form.reset();
       submitBtn.innerHTML = orig;
       submitBtn.disabled = false;
     }
